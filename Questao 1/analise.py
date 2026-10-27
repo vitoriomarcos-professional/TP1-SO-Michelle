@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Uso: python3 analise.py tempos_notebook.csv tempos_desktop.csv
-Gera: tabelas (stdout e tabelas.md), graficos por plataforma,
-      grafico consolidado normalizado.
+Le CSVs de tempos-csv/ e gera tabelas em resultados/ e graficos em graficos/.
 Requer: pip install pandas matplotlib tabulate
 """
 import sys
+from pathlib import Path
+
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
@@ -14,7 +15,14 @@ import matplotlib.pyplot as plt
 if len(sys.argv) < 2:
     sys.exit("Uso: python3 analise.py arquivo1.csv [arquivo2.csv ...]")
 
-df = pd.concat([pd.read_csv(f) for f in sys.argv[1:]], ignore_index=True)
+PROJECT_DIR = Path(__file__).resolve().parent
+CSV_DIR = PROJECT_DIR / "tempos-csv"
+RESULTS_DIR = PROJECT_DIR / "resultados"
+GRAPHS_DIR = PROJECT_DIR / "graficos"
+
+df = pd.concat([pd.read_csv(CSV_DIR / f) for f in sys.argv[1:]], ignore_index=True)
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+GRAPHS_DIR.mkdir(parents=True, exist_ok=True)
 
 stats = (df.groupby(["plataforma", "threads"])["tempo_s"]
            .agg(media="mean", desvio=lambda s: s.std(ddof=1))
@@ -34,7 +42,7 @@ for plat, g in df.groupby("plataforma"):
     if len(bad):
         print(f"[AVISO] {plat}: CV > 5% para threads = {list(bad.index)} -> refazer medicoes")
 
-open("tabelas.md", "w").write("\n".join(md))
+(RESULTS_DIR / "tabelas.md").write_text("\n".join(md), encoding="utf-8")
 print("\n".join(md))
 
 # Graficos individuais (tempo medio)
@@ -48,7 +56,7 @@ for plat, g in stats.groupby("plataforma"):
     plt.title(f"Tempo médio - {plat}")
     plt.grid(alpha=.3)
     plt.tight_layout()
-    plt.savefig(f"grafico_{plat}.png", dpi=150)
+    plt.savefig(GRAPHS_DIR / f"grafico_{plat}.png", dpi=150)
     plt.close()
 
 # Grafico consolidado normalizado (T(N) / T(1) na mesma plataforma)
@@ -66,5 +74,5 @@ plt.title("Curvas normalizadas")
 plt.legend()
 plt.grid(alpha=.3)
 plt.tight_layout()
-plt.savefig("grafico_normalizado.png", dpi=150)
+plt.savefig(GRAPHS_DIR / "grafico_normalizado.png", dpi=150)
 print("Graficos gerados.")

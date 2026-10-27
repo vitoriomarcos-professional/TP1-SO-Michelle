@@ -17,9 +17,13 @@ if ($ThreadCounts.Count -eq 0 -or $ThreadCounts | Where-Object { $_ -lt 1 -or $_
     throw "ThreadCounts deve conter valores entre 1 e 256."
 }
 
-$source = Join-Path $PSScriptRoot "pi_threads.c"
-$executable = Join-Path $PSScriptRoot "pi_threads.exe"
-$output = Join-Path (Get-Location) "tempos_$Platform.csv"
+$projectDirectory = Split-Path $PSScriptRoot -Parent
+$sourceDirectory = Join-Path $projectDirectory "source-code"
+$source = Join-Path $sourceDirectory "pi_threads.c"
+$executable = Join-Path $sourceDirectory "pi_threads.exe"
+$outputDirectory = Join-Path $projectDirectory "tempos-csv"
+New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+$output = Join-Path $outputDirectory "tempos_$Platform.csv"
 
 $gcc = Get-Command gcc -ErrorAction SilentlyContinue
 if (-not $gcc) {
@@ -32,11 +36,11 @@ if (-not (Test-Path $bash)) {
     throw "Nao encontrei o bash do MSYS2 em $bash."
 }
 
-$msysProject = $PSScriptRoot -replace '\\', '/'
-if ($msysProject -match '^([A-Za-z]):(.*)$') {
-    $msysProject = "/$($Matches[1].ToLower())$($Matches[2])"
+$msysSource = $sourceDirectory -replace '\\', '/'
+if ($msysSource -match '^([A-Za-z]):(.*)$') {
+    $msysSource = "/$($Matches[1].ToLower())$($Matches[2])"
 }
-$compileCommand = "export PATH=/ucrt64/bin:/usr/bin:`$PATH; cd `"$msysProject`" && gcc -O2 -Wall -Wextra -o pi_threads.exe pi_threads.c -lm -lpthread"
+$compileCommand = "export PATH=/ucrt64/bin:/usr/bin:`$PATH; cd `"$msysSource`" && gcc -O2 -Wall -Wextra -o pi_threads.exe pi_threads.c -lm -lpthread"
 & $bash -lc $compileCommand
 if ($LASTEXITCODE -ne 0) {
     throw "Falha ao compilar pi_threads.c."
