@@ -6,7 +6,7 @@ Centro Federal de Educação Tecnológica de Minas Gerais (CEFET-MG) – Profa. 
 
 ### Decisões de projeto e implementação
 
-O sistema é formado por dois programas independentes em C, A (`A.c`) e B (`B.c`), que se comunicam por filas de mensagens POSIX (`mqueue.h`) por meio de `mq_open`, `mq_send`, `mq_receive`, `mq_close` e `mq_unlink`. Os programas são compilados com `gcc ... -lrt`. O código-fonte completo está disponível em [https://github.com/caiocaasadei/questao2SO](https://github.com/caiocaasadei/questao2SO).
+O sistema é formado por dois programas independentes em C, A (`A.c`) e B (`B.c`), que se comunicam por filas de mensagens POSIX (`mqueue.h`) por meio de `mq_open`, `mq_send`, `mq_receive`, `mq_close` e `mq_unlink`. Os programas são compilados com `gcc ... -lrt`. O código-fonte completo está disponível em [https://github.com/vitoriomarcos-professional/TP1-SO-Michelle](https://github.com/vitoriomarcos-professional/TP1-SO-Michelle).
 
 - **Número de filas:** uma fila de pedidos compartilhada (`/tp1_so_pedidos_caio`), usada por todos os processos A para enviar pedidos e por todos os B para recebê-los, e uma fila de resposta para cada processo A (`/tp1_so_resp_<pid>`). Com N processos A há, portanto, N + 1 filas.
 - **Formato das mensagens:** o pedido (`Pedido`, 72 bytes) contém `n1`, `n2` e o nome da fila onde a resposta deve ser entregue; a resposta (`Resposta`, 4 bytes) contém apenas a soma. Enviar `n1` e `n2` na mesma mensagem garante que dois processos B nunca dividam entre si os números de um mesmo pedido.
