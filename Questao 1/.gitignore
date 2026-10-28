@@ -1,0 +1,18 @@
+# Compiled artifacts
+pi_threads
+pi_threads.exe
+*.o
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Course handout
+TP1_-_SO.pdf
